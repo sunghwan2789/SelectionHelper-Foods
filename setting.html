@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+    <style>
+#calorie-needed {
+    position: absolute;
+    right: 3.2em;
+}
+#reset {
+    position: absolute;
+    right: 0;
+}
+#setting {
+    margin-top: 6em;
+    height: 256px;
+    position: relative;
+}
+    #human-bg {
+        /* position base: center middle */
+        position: absolute;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        top: 50%;
+    }
+    #setup > * {
+        position: absolute;
+    }
+    #setup .sex {
+        /* position base: center bottom */
+        transform: translate(-50%, -100%);
+        left: 50%;
+        top: -3.2em;
+    }
+    #setup .age {
+        /* position base: center bottom */
+        transform: translate(-50%, -100%);
+        left: 50%;
+        top: -1em;
+    }
+    #setup .weight {
+        /* position base: right top */
+        transform: translate(-100%, 0);
+        left: calc(50% - 40px);
+        top: 0;
+    }
+    #setup .height {
+        /* position base: left top */
+        left: calc(50% + 40px);
+        top: 0;
+    }
+    #setup input[type=number],
+    #setup input[type=text] {
+        width: 3em;
+    }
+footer {
+    opacity: .3;
+    font-size: .4em;
+    margin-top: 3em;
+    text-align: center;
+}
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="toggle-nav"><i class="material-icons">menu</i></button><!--
+         --><span>개인 설정</span><!--
+         --><span id="calorie-needed">하루 권장량: NaN</span><!--
+         --><button id="reset" title="개인 설정 초기화"><i class="material-icons">settings_backup_restore</i></button>
+    </header>
+
+    <nav>
+        <a href="./"><i class="material-icons">home</i>대문</a>
+        <button><i class="material-icons more">expand_more</i><i class="material-icons less">expand_less</i>식사 주문 도우미</button>
+        <ul>
+            <li><a href="restaurant.html"><i class="material-icons">restaurant_menu</i>식당 차림표</a></li>
+            <li><a href="deliver.html"><i class="material-icons">motorcycle</i>배달 음식</a></li>
+        </ul>
+        <a href="history.html"><i class="material-icons">history</i>식사 기록</a>
+        <a href="setting.html" class="selected"><i class="material-icons">settings</i>개인 설정</a>
+        <a href="help.html"><i class="material-icons">help_outline</i>도움말</a>
+    </nav>
+
+    <main id="setting">
+        <img id="human-bg" src="data/man.png" width="256" height="256">
+        <form id="setup">
+            <div class="sex">성별:
+                <label><input type="radio" name="sex" value="m">남</label>
+                <label><input type="radio" name="sex" value="f">여</label>
+            </div>
+            <label class="age">나이: <input type="number" name="age" min="1">세</label>
+            <label class="weight">체중: <input type="number" name="weight" min="0">kg</label>
+            <label class="height">키: <input type="number" name="height" min="0">cm</label>
+        </form>
+    </main>
+
+    <footer>
+        <p>이 페이지의 설정을 기반으로 음식을 추천해드립니다!<br>
+            정확하게 입력하시기 바랍니다.
+        <p>Icon made by <a href="http://www.unocha.org" title="OCHA">OCHA</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed under <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0">CC BY 3.0</a>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="healthfood.js"></script>
+    <script>
+
+var setting = HealthFood.getSetting();
+for (var key in setting)
+{
+    if (!(key in setup))
+    {
+        continue;
+    }
+    setup[key].value = setting[key];
+}
+
+/** 한국인 표준 체중 정보 참조 */
+function getIdealWeight(height, sex)
+{
+    var ch = height / 100;
+    return ch * ch * (21 + (sex == 'm'));
+}
+
+function updateSetting()
+{
+    var setting = {
+        sex: setup.sex.value,
+        age: setup.age.value,
+        weight: setup.weight.value,
+        height: setup.height.value
+    };
+
+    var kcal = document.querySelector('#calorie-needed');
+    kcal.textContent = '하루 권장량: ' + (HealthFood.getNecessarykCalorie(setting) | 0) + 'kcal';
+
+    var human = document.querySelector('#human-bg');
+
+    var sexKey = [ 'man', 'woman' ][(setting.sex == 'f') | 0];
+    human.src = 'data/' + sexKey + '.png';
+
+    var iWeight = getIdealWeight(setting.height, setting.sex);
+    var idealRatio = setting.weight / iWeight;
+    human.width = idealRatio * 256;
+
+    HealthFood.setSetting(setting);
+}
+for (var i = 0; i < setup.length; i++)
+{
+    var component = setup[i];
+    component.addEventListener('change', updateSetting);
+    component.addEventListener('input', updateSetting);
+}
+updateSetting();
+
+document.querySelector('#reset').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    if (!confirm('개인 설정을 초기화할까요?'))
+    {
+        return;
+    }
+    HealthFood.setSetting();
+    location.reload();
+});
+
+    </script>
+
+</body>
+</html>

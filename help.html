@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+    <style>
+article,
+section {
+    overflow: hidden;
+    box-shadow: inset 0 -1em 1em -1em rgba(0, 0, 0, .3);
+    max-height: 1000em;
+    transition: max-height .3s linear;
+    color: #444;
+    background: #eee;
+}
+main > article { background: none; color: inherit; }
+article.fold,
+section.fold { max-height: 3.2em !important; border-bottom: 1px solid rgba(0, 0, 0, .54); box-shadow: none; }
+    h1 {
+        font-size: 1em;
+        line-height: 3.2em;
+        font-weight: normal;
+        margin: 0;
+        box-shadow: 0 0 1em rgba(0, 0, 0, .3);
+        padding-left: .5em;
+        background: #666;
+        color: #fff;
+    }
+    main > article > h1 { background: none; color: inherit; }
+    h1::before { content: '─ '; }
+    article.fold > h1::before,
+    section.fold > h1::before { content: '┼ '; }
+    .js h1 { cursor: pointer; }
+
+    table {
+        margin: 0 auto;
+        border-collapse: collapse;
+        background: #333;
+        color: #fff;
+    }
+    th {
+        padding: .8em;
+    }
+    td {
+        padding: .8em;
+        color: #444;
+        background: #eee;
+    }
+    tr td:last-child { white-space: nowrap; max-width: 10em; overflow: hidden; text-overflow: ellipsis; }
+    tr:not(:last-child) {
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+
+    @media (max-width: 600px) {
+        thead { display: none; }
+        td {
+            display: block;
+            padding: .6em;
+        }
+        tr td:first-child {
+            background: #666;
+            color: #fff;
+        }
+        tr td:last-child { max-width: none; }
+        td::before {
+            content: attr(data-th);
+            font-weight: bold;
+            display: inline-block;
+            width: 4em;
+        }
+    }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="toggle-nav"><i class="material-icons">menu</i></button><!--
+         --><span>도움말</span>
+    </header>
+
+    <nav>
+        <a href="./"><i class="material-icons">home</i>대문</a>
+        <button><i class="material-icons more">expand_more</i><i class="material-icons less">expand_less</i>식사 주문 도우미</button>
+        <ul>
+            <li><a href="restaurant.html"><i class="material-icons">restaurant_menu</i>식당 차림표</a></li>
+            <li><a href="deliver.html"><i class="material-icons">motorcycle</i>배달 음식</a></li>
+        </ul>
+        <a href="history.html"><i class="material-icons">history</i>식사 기록</a>
+        <a href="setting.html"><i class="material-icons">settings</i>개인 설정</a>
+        <a href="help.html" class="selected"><i class="material-icons">help_outline</i>도움말</a>
+    </nav>
+
+    <main>
+        <article>
+            <h1>건강한 식사의 중요성</h1>
+            <p>이 사이트는 건강한 음식을 추천하는 사이트입니다. 여기서 건강한 음식이란 한국인 하루 권장 섭취 열량을 적당히 따르는 것을 말합니다.</p>
+            <p>건강한 식사를 하면 보기 좋은 체형을 유지할 수 있고, 오래 살 수 있습니다. 반면, 충분한 열량을 섭취하지 못하면 살이 빠지고, 심장이 무리를 하며, 각종 병에 걸릴 수 있습니다. 너무 많이 섭취할 경우도 좋지 않습니다.</p>
+            <p>기아체험에 참여하면 24시간 동안 밥을 굶게 됩니다. 아이들이 건강한 식사를 못해 힘든 점을 체험하는 것이지요. 이렇게 특수한 경우를 빼고는 제대로 음식을 섭취하는 게 좋습니다.</p>
+        </article>
+        <article>
+            <h1>사이트 활용법</h1>
+            <p>이 사이트는 건강한 음식을 추천하는 것 외에도 다양한 기능을 제공합니다. 정확한 식단 관리를 위한 개인 설정, 식사 기록 관리 등이 있습니다.</p>
+            <section>
+                <h1>식사 주문 도우미 - 식당 차림표</h1>
+                <p>이 기능은 다음 전제조건을 두고 만든 기능입니다.</p>
+                <ol>
+                    <li>당신이 식당 안에 있습니다.</li>
+                    <li>무슨 음식을 고를지 고민하고 있습니다.</li>
+                    <li>되도록 건강한 음식을 먹고 싶습니다.</li>
+                </ol>
+                <p>이 페이지는 당신이 있는 식당에서 건강한 음식을 골라줍니다.</p>
+            </section>
+            <section>
+                <h1>식사 주문 도우미 - 배달 음식</h1>
+                <p>이 기능은 당신이 식당 밖에 있을 때 간단히 먹을 수 있는 건강한 배달 음식을 골라줍니다.</p>
+                <p>그러나 배달 음식 업체 섭외가 힘들어 아직 개발하지 못했습니다.</p>
+            </section>
+            <section>
+                <h1>식사 기록</h1>
+                <p>자취를 하였거나 음식이 자료에 등록되어있지 않을 때 수동으로 식사를 기록하는 기능입니다.</p>
+                <p>그동안의 식사 기록을 한눈에 확인 할 수 있으며, 기록 추가와 삭제도 할 수 있습니다.</p>
+            </section>
+            <section>
+                <h1>개인 설정</h1>
+                <p>이 사이트에서 가장 중요한 페이지입니다. 이곳의 설정을 기반으로 건강한 음식을 판단합니다.</p>
+                <p>설정에 따라 모습이 바뀌는 캐릭터로 나의 체형이 어느 정도인가 확인할 수 있습니다. 추가로, 이 페이지에서 당신의 하루 권장 열량 섭취량을 확인할 수 있습니다.</p>
+            </section>
+        </article>
+        <article>
+            <h1>각종 자료의 출처</h1>
+            <p>이 사이트는 다양한 서비스의 공개 자료를 활용하여 만들었습니다.</p>
+            <table>
+                <thead><tr><th>항목<th>출처<th>기관<th>URL</thead>
+                <tbody>
+                    <tr>
+                        <td>식당 정보
+                        <td>직접 조사
+                        <td>-
+                        <td>-
+                    <tr>
+                        <td>음식 영양소 정보
+                        <td>식품영양성분데이터베이스
+                        <td>식품의약품안전처
+                        <td>http://foodnara.go.kr/kisna/index.do?nMenuCode=17&amp;code4=2
+                    <tr>
+                        <td>하루 권장 열량 섭취량 계산식
+                        <td>한국인 영양섭취기준 활용가이드 - 일반인용(28쪽)
+                        <td>보건복지부
+                        <td>http://health.mw.go.kr/ReferenceRoomArea/HealthFileRoom/healthFileDetail.do?ED_NO=1850
+                    <tr>
+                        <td>표준 체중 계산식
+                        <td>표준 체중 계산기
+                        <td>365홈케어
+                        <td>https://www.365homecare.com/calculator/CALDI0201.html
+                    </tr>
+            </table>
+        </article>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+
+document.querySelector('main').classList.add('js');
+
+var headertext = [],
+    headers = document.querySelectorAll('th'),
+    tablerows = document.querySelectorAll('th'),
+    tablebody = document.querySelector('tbody');
+for(var i = 0; i < headers.length; i++)
+{
+    var current = headers[i];
+    headertext.push(current.textContent.replace(/\r?\n|\r/, ''));
+}
+for (var i = 0, row; row = tablebody.rows[i]; i++)
+{
+    for (var j = 0, col; col = row.cells[j]; j++)
+    {
+        col.setAttribute('data-th', headertext[j]);
+    }
+}
+
+var titles = document.querySelectorAll('h1');
+for (var i = 0; i < titles.length; i++)
+{
+    var title = titles[i];
+    var parent_ = title.parentNode;
+    parent_.style.maxHeight = parent_.scrollHeight + 'px';
+    parent_.classList.add('fold');
+    title.addEventListener('click', function(e)
+    {
+        e.preventDefault();
+        this.parentNode.classList.toggle('fold');
+    });
+}
+window.addEventListener('resize', function()
+{
+    for (var i = 0; i < titles.length; i++)
+    {
+        var title = titles[i];
+        var parent_ = title.parentNode;
+        var bheight = parseInt(parent_.style.maxHeight) || 0;
+        parent_.style.maxHeight = Math.max(bheight, parent_.scrollHeight) + 'px';
+    }
+});
+window.dispatchEvent(new UIEvent('resize'));
+
+    </script>
+
+</body>
+</html>

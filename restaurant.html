@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+    <style>
+#toggle-menu {
+    position: absolute;
+    right: 0;
+}
+#menu {
+    position: absolute;
+    top: 3.2em;
+    left: 0;
+    border: 0;
+    width: 100%;
+    height: 100%;
+    max-height: 0;
+    transition: max-height .3s linear;
+}
+#menu.opened { max-height: calc(100% - 3.2em); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="toggle-nav"><i class="material-icons">menu</i></button><!--
+         --><button id="refresh-position" title="현재 위치 찾기"><i class="material-icons">my_location</i></button><!--
+         --><span id="currentRestaurant">현재 식당: 알 수 없음</span><!--
+         --><button id="toggle-menu" title="차림표 여닫기"><i class="material-icons more">expand_more</i><i class="material-icons less">expand_less</i></button>
+    </header>
+
+    <nav>
+        <a href="./"><i class="material-icons">home</i>대문</a>
+        <button class="opened"><i class="material-icons more">expand_more</i><i class="material-icons less">expand_less</i>식사 주문 도우미</button>
+        <ul>
+            <li><a href="restaurant.html" class="selected"><i class="material-icons">restaurant_menu</i>식당 차림표</a></li>
+            <li><a href="deliver.html"><i class="material-icons">motorcycle</i>배달 음식</a></li>
+        </ul>
+        <a href="history.html"><i class="material-icons">history</i>식사 기록</a>
+        <a href="setting.html"><i class="material-icons">settings</i>개인 설정</a>
+        <a href="help.html"><i class="material-icons">help_outline</i>도움말</a>
+    </nav>
+
+    <main id="map" style="height: 100%;"></main>
+    <iframe id="menu" src="menu.html"></iframe>
+
+    <script src="script.js"></script>
+    <script src="csvreader.js"></script>
+    <script src="restaurants.js"></script>
+    <script>
+
+// prompt progress gathering gps lat,lng
+
+var map, marker;
+function initMap()
+{
+    // SOONCHUNHYANG UNIV.
+    var SCHpos = {lat: 36.769684, lng: 126.931692};
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: SCHpos,
+        zoom: 18,
+        streetViewControl: false
+    });
+    restaurants.forEach(function(res)
+    {
+        marker = new google.maps.Marker({
+            map: map,
+            opacity: .7,
+            position: res.position,
+            title: res.name
+        });
+        marker.id = res.id;
+        marker.addListener('click', function(e)
+        {
+            var rest;
+            e.stop();
+            rest = restaurants.find(this.id);
+            map.setCenter(rest.position);
+        });
+    });
+    marker = new google.maps.Marker({
+        map: map,
+        position: SCHpos,
+        clickable: false
+    });
+    map.addListener('center_changed', function()
+    {
+        var pos = this.getCenter();
+        marker.setPosition(pos);
+        var closest = findClosestRestaurant(pos);
+        document.querySelector('#menu').contentWindow.location.hash = closest ? closest.id : 0;
+        document.querySelector('#currentRestaurant').textContent = '현재 식당: ' + (closest ? closest.name : '알 수 없음');
+    });
+
+    document.querySelector('#refresh-position').click();
+}
+
+document.querySelector('#refresh-position').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    navigator.geolocation.getCurrentPosition(function(pos)
+    {
+        map.setCenter({lat: pos.coords.latitude, lng: pos.coords.longitude});
+    }, function(e) { alert('위치 확인에 실패했습니다. 수동으로 위치를 옮겨주세요.'); }, {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+    });
+});
+
+function findClosestRestaurant(pos)
+{
+    var closest, lastDist = 1;
+    restaurants.forEach(function(res)
+    {
+        var dist = Math.hypot(pos.lat() - res.position.lat, pos.lng() - res.position.lng);
+        if (dist < .0003 && dist < lastDist)
+        {
+            closest = res;
+            lastDist = dist;
+        }
+    });
+    return closest;
+}
+
+document.querySelector('#toggle-menu').addEventListener('click', function(e)
+{
+    var opened;
+    e.preventDefault();
+    opened = this.classList.toggle('opened');
+    opened = document.querySelector('#menu').classList.toggle('opened');
+});
+
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC8YlbnOWVjj9J_A0jtx8uNOsU9Ak8CKm4&amp;callback=initMap"></script>
+</body>
+</html>

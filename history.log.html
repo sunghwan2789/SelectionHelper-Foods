@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+    <style>
+#log-history {
+    position: absolute;
+    right: 0;
+}
+#food {
+    margin: .5em 1em 0;
+}
+    #food label {
+        display: block;
+        padding-left: 4em;
+        line-height: 2.5em;
+        box-sizing: border-box;
+    }
+    #food span {
+        position: absolute;
+        z-index: -1;
+        margin-left: -4em;
+        line-height: 2.5em;
+    }
+    #food input {
+        box-sizing: border-box;
+        width: 100%;
+    }
+    #detail label { display: inline-block; width: 50%; }
+    #detail input { width: calc(100% - 3em); }
+    #foods {
+        margin: 0;
+        list-style: none;
+        position: absolute;
+        left: 0;
+        box-sizing: border-box;
+        width: 100%;
+        padding: 0 1em 0 5em;
+        background: #fff;
+        box-shadow: inset 0 1em 1em -1em rgba(0, 0, 0, .54);
+    }
+        #foods li {
+            line-height: 2.1em;
+            border-bottom: .1em solid rgba(0, 0, 0, .54);
+            cursor: pointer;
+            color: rgba(0, 0, 0, .54);
+        }
+        #foods li:hover,
+        #foods li:focus { color: rgba(0, 0, 0, .87); }
+        #foods li:hover::before,
+        #foods li:focus::before { content: '> '; }
+    #close-foods {
+        position: absolute;
+        margin-top: 1em;
+        background: #03A9F4;
+        color: rgba(255, 255, 255, .87);
+        width: 3em;
+        height: 3em;
+        border-radius: 1.5em;
+        /*box-shadow: 0 0 .5em rgba(0, 0, 0, .54);*/
+    }
+    #foods:empty + #close-foods { display: none; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="return-history"><i class="material-icons">arrow_back</i></button><!--
+         --><span>새 식사 기록</span><!--
+         --><button id="log-history"><i class="material-icons">check</i></button>
+    </header>
+
+    <main id="log">
+        <form id="food">
+            <label><span>날짜:</span><input type="date" name="date"></label>
+            <label><span>시각:</span><input type="time" name="time"></label>
+            <label><span>음식:</span><input type="search" name="name"></label>
+            <!-- 음식 검색 결과 보이기(섭취량, 열량 자동 입력) -->
+            <!-- ul#foods > li{food.name} -->
+            <ul id="foods"></ul>
+            <button id="close-foods"><i class="material-icons">close</i></button>
+            <div id="detail">
+                <label><span>섭취량:</span><input type="number" name="servingSize" min="0">g</label><!--
+                 --><label><span>열량:</span><input type="number" name="kCalorie" min="0">kcal</label>
+            </div>
+        </form>
+    </main>
+
+    <script src="csvreader.js"></script>
+    <script src="foods.js"></script>
+    <script src="healthfood.js"></script>
+    <script src="foodpreview.js"></script>
+    <script>
+
+document.querySelector('#return-history').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    history.back();
+});
+
+document.querySelector('#log-history').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    // food submit 처리
+    if (!confirm('기록을 추가할까요?'))
+    {
+        return;
+    }
+    var datetime = new Date([ food.date.value, food.time.value ].join('T'));
+    // to UTC
+    datetime = datetime.setHours(datetime.getHours() - 9);
+    HealthFood.addHistory(datetime, {
+        name: food.name.value,
+        servingSize: +food.servingSize.value || 0,
+        kCalorie: +food.kCalorie.value || 0
+    });
+    history.back();
+});
+
+var now = new Date();
+// 우리나라 TimeZone: UTC+09:00
+now = new Date(now.setHours(now.getHours() + 9));
+var tstr = now.toJSON().split(/[T\.]/);
+food.date.value = tstr[0];
+food.time.value = tstr[1].split(':', 2).join(':');
+
+function searchFood()
+{
+    closeFoods();
+
+    // 검색어가 없으면...
+    if (!food.name.value.length)
+    {
+        return;
+    }
+
+    var results = document.querySelector('#foods'),
+        cnt = 0;
+    foods.forEach(function(e)
+    {
+        // 음식명에 검색어가 없으면...
+        if (cnt >= 10 || e.name.indexOf(food.name.value) == -1)
+        {
+            return;
+        }
+
+        var result = document.createElement('li');
+        result.classList.add('foodh');
+        result.reference = e;
+        result.textContent = e.name;
+        result.tabIndex = 0;
+        result.addEventListener('click', selectFood);
+        result.addEventListener('keydown', function(e)
+        {
+            var Enter = 13;
+            if (e.keyCode != Enter)
+            {
+                return;
+            }
+            selectFood.call(this, e);
+        });
+        results.appendChild(result);
+
+        cnt++;
+    });
+}
+
+food.name.addEventListener('change', searchFood);
+food.name.addEventListener('input', searchFood);
+
+function focusFood(e)
+{
+    var Up = 38,
+        Down = 40,
+        cur = document.activeElement;
+    if (e.keyCode == Up)
+    {
+        e.preventDefault();
+        if (cur.nodeName != 'LI')
+        {
+            this.blur();
+            document.querySelector('#foods li').focus();
+            return;
+        }
+        cur.previousSibling.focus();
+        return;
+    }
+    if (e.keyCode == Down)
+    {
+        e.preventDefault();
+        if (cur.nodeName != 'LI')
+        {
+            this.blur();
+            document.querySelector('#foods li').focus();
+            return;
+        }
+        cur.nextSibling.focus();
+        return;
+    }
+}
+
+food.name.addEventListener('keydown', focusFood);
+document.querySelector('#foods').addEventListener('keydown', focusFood);
+
+function selectFood(e)
+{
+    e.preventDefault();
+    food.name.value        = this.reference.name;
+    food.servingSize.value = this.reference.servingSize;
+    food.kCalorie.value    = this.reference.kCalorie;
+    closeFoods();
+}
+
+document.querySelector('#close-foods').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    closeFoods();
+});
+
+function closeFoods()
+{
+    var results = document.querySelector('#foods');
+    while (results.firstChild)
+    {
+        results.removeChild(results.firstChild);
+    }
+}
+
+
+    </script>
+
+</body>
+</html>

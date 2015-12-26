@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+    <style>
+#insert-history {
+    position: absolute;
+    right: 3.2em;
+}
+#clear-history {
+    position: absolute;
+    right: 0;
+}
+#history {
+    line-height: 2em;
+}
+#history ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+#days > li {
+    margin: .5em 0 0 .5em;
+}
+#days > li::before { content: '•'; color: #8BC34A; margin-right: .5em; }
+    #days .foods {
+        border-left: .3em solid #8BC34A;
+        padding-left: .5em;
+    }
+    .foods li {
+        position: relative;
+    }
+        .foods time {
+            margin-right: .5em;
+        }
+        .foods span {
+            color: rgba(0, 0, 0, .54);
+            font-size: .7em;
+            vertical-align: top;
+        }
+        .foods span.foodh {
+            color: inherit;
+            font-size: inherit;
+        }
+        .foods .calorie {
+            position: absolute;
+            right: 3em;
+        }
+        .foods .remove {
+            position: absolute;
+            right: 0;
+            color: #03A9F4;
+            width: 2em;
+            height: 2em;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="toggle-nav"><i class="material-icons">menu</i></button><!--
+         --><span>식사 기록</span><!--
+         --><button id="insert-history"><i class="material-icons">add</i></button><!--
+         --><button id="clear-history"><i class="material-icons">clear_all</i></button>
+    </header>
+
+    <nav>
+        <a href="./"><i class="material-icons">home</i>대문</a>
+        <button><i class="material-icons more">expand_more</i><i class="material-icons less">expand_less</i>식사 주문 도우미</button>
+        <ul>
+            <li><a href="restaurant.html"><i class="material-icons">restaurant_menu</i>식당 차림표</a></li>
+            <li><a href="deliver.html"><i class="material-icons">motorcycle</i>배달 음식</a></li>
+        </ul>
+        <a href="history.html" class="selected"><i class="material-icons">history</i>식사 기록</a>
+        <a href="setting.html"><i class="material-icons">settings</i>개인 설정</a>
+        <a href="help.html"><i class="material-icons">help_outline</i>도움말</a>
+    </nav>
+
+    <main id="history">
+
+        <!-- ul#days > li{day} > ul.foods > li{time, food.name, food.kCalorie} -->
+        <ul id="days"></ul>
+
+    </main>
+
+    <script src="script.js"></script>
+    <script src="healthfood.js"></script>
+    <script src="foodpreview.js"></script>
+    <script>
+
+function getDay(ms)
+{
+    // UTC+09:00
+    ms += 9 * 3600 * 1000;
+    return ms / 1000 / 60 / 60 / 24 | 0;
+}
+
+function getTime(ms)
+{
+    // UTC+09:00
+    ms += 9 * 3600 * 1000;
+    var min = ms / 1000 / 60 % 60 | 0;
+    var hour = ms / 1000 / 60 / 60 % 24 | 0;
+    min = min < 10 ? '0' + min : min;
+    hour = hour < 10 ? '0' + hour : hour;
+    return hour + ':' + min;
+}
+
+function getDate(day)
+{
+    var comp = getDay(Date.now());
+    var diff = comp - day;
+    return ['오늘', '어제', '아래'][diff] || diff + '일 전';
+}
+
+var histos = HealthFood.getHistory();
+var currentDay;
+var dayFoods;
+
+/** callback of button click */
+function removeHistory()
+{
+    if (!confirm('이 식사 기록을 지울까요?'))
+    {
+        return;
+    }
+    var idx = this.reference.idx;
+    var nhistos = histos.slice(0, idx).concat(histos.slice(idx + 1));
+    HealthFood.setHistory(nhistos);
+    location.reload();
+}
+
+/** callback of food click */
+function calcToggle()
+{
+    // 화면 아래에 토글 정보창
+}
+
+for (var i = histos.length; i--;)
+{
+    var histo = histos[i];
+    var histoDay = getDay(histo.datetime);
+    if (typeof currentDay == 'undefined' ||
+        histoDay != currentDay)
+    {
+        currentDay = histoDay;
+
+        var day = document.createElement('li');
+        day.textContent = getDate(currentDay);
+
+        dayFoods = document.createElement('ul');
+        dayFoods.classList.add('foods');
+        day.appendChild(dayFoods);
+
+        document.querySelector('#days').appendChild(day);
+    }
+
+    var food = document.createElement('li');
+    food.idx = i;
+    food.data = histo;
+    food.addEventListener('click', calcToggle);
+
+    var time = document.createElement('time');
+    time.textContent = getTime(histo.datetime);
+    food.appendChild(time);
+
+    var fname = document.createElement('span');
+    fname.classList.add('foodh');
+    fname.textContent = histo.food.name;
+    food.appendChild(fname);
+
+    var size = document.createElement('span');
+    size.classList.add('size');
+    size.textContent = '(' + histo.food.servingSize + 'g)';
+    food.appendChild(size);
+
+    var kcal = document.createElement('span');
+    kcal.classList.add('calorie');
+    kcal.textContent = histo.food.kCalorie + 'kcal';
+    food.appendChild(kcal);
+
+    var remov = document.createElement('button');
+    remov.classList.add('remove');
+    remov.innerHTML = '<i class="material-icons">remove_circle_outline</i>';
+    remov.reference = food;
+    remov.addEventListener('click', removeHistory);
+    food.appendChild(remov);
+
+    dayFoods.appendChild(food);
+}
+
+document.querySelector('#insert-history').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    // 기록 추가하는 화면 띄우기
+    location = 'history.log.html';
+});
+
+document.querySelector('#clear-history').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    if (!confirm('식사 기록을 초기화할까요?'))
+    {
+        return;
+    }
+    HealthFood.setHistory();
+    location.reload();
+});
+
+    </script>
+
+</body>
+</html>

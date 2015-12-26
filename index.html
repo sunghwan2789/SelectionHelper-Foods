@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+    <style>
+header span {
+    width: calc(100% - 6.4em);
+    text-align: center;
+}
+main {
+    text-align: center;
+}
+video {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+}
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="toggle-nav"><i class="material-icons">menu</i></button><!--
+         --><span>건강 식사 도우미</span>
+    </header>
+
+    <nav>
+        <a href="./" class="selected"><i class="material-icons">home</i>대문</a>
+        <button><i class="material-icons more">expand_more</i><i class="material-icons less">expand_less</i>식사 주문 도우미</button>
+        <ul>
+            <li><a href="restaurant.html"><i class="material-icons">restaurant_menu</i>식당 차림표</a></li>
+            <li><a href="deliver.html"><i class="material-icons">motorcycle</i>배달 음식</a></li>
+        </ul>
+        <a href="history.html"><i class="material-icons">history</i>식사 기록</a>
+        <a href="setting.html"><i class="material-icons">settings</i>개인 설정</a>
+        <a href="help.html"><i class="material-icons">help_outline</i>도움말</a>
+    </nav>
+
+    <main>
+        <video src="data:video/mpeg," loop autoplay></video>
+        <p>오늘 음식 섭취량: <span id="today"></span>kcal<br>
+            하루 권장 섭취량: <span id="necessary"></span>kcal</p>
+        <p id="advice"></p>
+    </main>
+
+    <script src="script.js"></script>
+    <script src="healthfood.js"></script>
+    <script>
+
+var hours = (new Date()).getHours();
+var ate = HealthFood.getkCalorieLastHours(hours);
+var necessary = HealthFood.getNecessarykCalorie(HealthFood.getSetting());
+var calPer = ate / (necessary * hours / 24);
+
+var video = document.querySelector('video');
+var videos = [ 'jump-rope.mp4', 'run.mp4' ];
+video.src = 'data/' + videos[videos.length * Math.random() | 0];
+video.playbackRate = calPer;
+// video.play();
+
+document.querySelector('#today').textContent = ate.toFixed(2);
+document.querySelector('#necessary').textContent = necessary.toFixed(2);
+
+var advice = document.querySelector('#advice');
+if (calPer < .7)
+{
+    advice.textContent = '영양 섭취가 필요합니다!!';
+}
+else if (calPer < 1.3)
+{
+    advice.textContent = '적당히 드셨군요~';
+}
+else
+{
+    advice.textContent = '살이 찝니다! 조심하세요!';
+}
+
+    </script>
+
+</body>
+</html>

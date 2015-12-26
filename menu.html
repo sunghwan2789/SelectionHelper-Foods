@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko" id="page-menu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>건강 식사 도우미</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="change-food">음식 자동 선택</button>
+    <!-- 자동 선택한 음식 span에 쓰기 -->
+    <span class="foodh"></span><button id="select-food" disabled>이 음식으로 주문!</button>
+    <!-- 자동 선택에 고려한 사항 쓰기 -->
+    <div></div>
+    <!-- 식당 차림표 알림 -->
+    <ul></ul>
+
+    <script src="healthfood.js"></script>
+    <script src="csvreader.js"></script>
+    <script src="restaurants.js"></script>
+    <script src="foods.js"></script>
+    <script src="foodpreview.js"></script>
+    <script>
+
+var restaurant;
+window.addEventListener('hashchange', function(e)
+{
+    var restaruantId = location.href.split('#')[1];
+    var ul = document.querySelector('ul');
+    var selected = document.querySelector('span');
+    selected.textContent = '';
+    selected.nextSibling.disabled = true;
+    // ul 초기화
+    while (ul.firstChild)
+    {
+        ul.removeChild(ul.firstChild);
+    }
+    // li 추가
+    restaurant = restaurants.find(restaruantId);
+    if (!restaurant)
+    {
+        return;
+    }
+
+    for (var i = 0; i < restaurant.foods.length; i++)
+    {
+        var food = foods.find(restaurant.foods[i]);
+
+        var li = document.createElement('li');
+        li.classList.add('foodh');
+        li.textContent = food.name;
+        ul.appendChild(li);
+
+        // console.log(foods.find(restaurant.foods[i]));
+    }
+});
+window.dispatchEvent(new HashChangeEvent('hashchange'));
+
+// 사용자의 영양 상태에 기준한 싸고 맛있는 음식 추천
+var food;
+document.querySelector('#change-food').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    var time = Date.now();
+    var self = this;
+    var selected = document.querySelector('span');
+    self.disabled = selected.nextSibling.disabled = true;
+
+    if (!restaurant || !restaurant.foods.length)
+    {
+        self.disabled = false;
+        return;
+    }
+
+    // 멋진 애니메이션 이펙트~
+    food = undefined;
+    selected.textContent = '';
+    function go()
+    {
+        var now = Date.now();
+        var elapsed = now - time;
+        if (elapsed > 3000)
+        {
+            // 건강한 음식을 고르지 못했다.
+            if (!food)
+            {
+                // 음식이 없었다...
+                if (!restaurant.foods.length)
+                {
+                    alert('음식이 없습니다!');
+                }
+                // 영양소 초과
+                else
+                {
+                    alert('건강한 음식이 없습니다!!');
+                }
+            }
+            // 건강한 음식을 찾음!
+            else
+            {
+                selected.nextSibling.disabled = false;
+            }
+            self.disabled = false;
+            return;
+        }
+
+        var idx = (restaurant.foods.length - 1) * Math.random() | 0;
+        var foodId = restaurant.foods[idx];
+
+        var nfood = foods.find(foodId);
+        if (HealthFood.isHealthy(nfood))
+        {
+            food = nfood;
+            selected.textContent = food.name;
+        }
+
+        requestAnimationFrame(go);
+    }
+    requestAnimationFrame(go);
+});
+
+document.querySelector('#select-food').addEventListener('click', function(e)
+{
+    e.preventDefault();
+    if (!food || !confirm('이번 식사는 ' + food.name + '으로 할까요?'))
+    {
+        return;
+    }
+    HealthFood.addHistory(Date.now(), food);
+    parent.location = 'history.html';
+});
+
+    </script>
+
+</body>
+</html>

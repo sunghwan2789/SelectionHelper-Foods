@@ -1,0 +1,124 @@
+/* 초기화 */
+@import url(https://fonts.googleapis.com/earlyaccess/notosanskr.css);
+html, body { height: 100%; } body { margin: 0; -webkit-text-size-adjust: 100%; }
+body, input, select, textarea, button {
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    color: rgba(0, 0, 0, .87);
+}
+
+/* 컴포넌트 스타일 */
+button {
+    border: 0;
+    padding: 0;
+    background: none;
+    cursor: pointer;
+}
+button::-moz-focus-inner { border: 0; padding: 0; }
+.material-icons { vertical-align: top; }
+
+/* 레이아웃 */
+body {
+    padding-top: 3.2em;
+    box-sizing: border-box;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+header {
+    width: 100%;
+    height: 3.2em;
+    background: #8BC34A;
+    color: rgba(255, 255, 255, .87);
+    position: fixed;
+    margin-top: -3.2em;
+    z-index: 2;
+    white-space: nowrap;
+}
+    header button {
+        width: 3.2em;
+        height: 3.2em;
+        color: rgba(255, 255, 255, .87);
+        vertical-align: top;
+    }
+    button.opened .more,
+    button:not(.opened) .less { display: none; }
+    header span {
+        line-height: 3.2em;
+        display: inline-block;
+    }
+nav {
+    position: fixed;
+    width: auto;
+    height: calc(100% - 3.2em);
+    background: #DCEDC8;
+    transform: translateX(-100%);
+    transition: transform .2s linear;
+    overflow-y: scroll;
+    z-index: 1;
+}
+nav.opened { transform: translateX(0); box-shadow: 0 0 1em rgba(0, 0, 0, .4); }
+    nav a, nav button {
+        line-height: 3.2em;
+        text-decoration: none;
+        display: block;
+        color: rgba(0, 0, 0, .54);
+        padding-right: 1em;
+    }
+    nav a.selected { background: #8BC34A; color: rgba(255, 255, 255, .87); }
+        nav a .material-icons {
+            width: 2em;
+            text-align: center;
+        }
+        nav .material-icons {
+            line-height: 2em;
+        }
+    nav ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        box-shadow: inset 0 -1em 1em -1em rgba(0, 0, 0, .4);
+        overflow: hidden;
+        max-height: 6.4em;
+        transition: max-height .2s linear;
+    }
+    nav button:not(.opened) + ul { max-height: 0; }
+
+
+/* 차림표 선택기 */
+#page-menu body {
+    color: rgba(0, 0, 0, .54);
+    padding: 0;
+    background: #DCEDC8;
+    overflow: visible;
+}
+#page-menu ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    overflow: hidden;
+}
+#page-menu li {
+    line-height: 2.6em;
+    padding: 0 .5em;
+    float: left;
+}
+#page-menu button {
+    border: .125em solid #8BC34A;
+    padding: .25em;
+    margin: .7em;
+    border-radius: .5em;
+}
+#page-menu button:disabled { color: rgba(0, 0, 0, .54); }
+#page-menu span + button:disabled,
+#page-menu button:disabled + div { display: none; }
+
+/* 음식 미리보개 */
+#foodp {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border: 0;
+    box-shadow: 0 0 2em rgba(0, 0, 0, .54);
+    overflow: hidden;
+}
+#foodp.load { display: none; }
